@@ -48,7 +48,7 @@ class ChatState(models.Model):
 
 class Mail(models.Model):
     text = models.TextField(
-        verbose_name='Текст рассылки'
+        verbose_name='Текст заявки'
     )
     photo = models.FileField(
         verbose_name='Изображение',
@@ -59,8 +59,8 @@ class Mail(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Рассылка'
-        verbose_name_plural = 'Рассылки'
+        verbose_name = 'Заявка'
+        verbose_name_plural = 'Заявки'
 
     def __str__(self):
         return f'{self.text}'

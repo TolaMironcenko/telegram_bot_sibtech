@@ -42,14 +42,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         bot = telebot.TeleBot(settings.BOT_TOKEN)
-        print(bot.get_me())
+        # print(bot.get_me())
 
         @log_errors
         def main_bot(messages):
             for message in messages:
                 if message.text is not None:
                     if message.text.split(' ')[0] == '/start':
-                        print(message.chat.id)
+                        # print(message.chat.id)
                         set_state(message.chat.id, 0)
                         bot.send_message(message.chat.id, "Привет это чат поддержки", reply_markup=markup)
 
@@ -68,7 +68,7 @@ class Command(BaseCommand):
         @log_errors
         @bot.message_handler(func=lambda message: get_state(message.chat.id) == 1)
         def enter_text_to_send(message):
-            print(message.text)
+            # print(message.text)
             NewMail['text'] = message.text
             set_state(message.chat.id, 2)
             bot.send_message(message.chat.id, "Прикрепите изображение")
@@ -76,7 +76,7 @@ class Command(BaseCommand):
         @log_errors
         @bot.message_handler(content_types=["photo"], func=lambda message: get_state(message.chat.id) == 2)
         def enter_photo(message):
-            print(message.text)
+            # print(message.text)
             Path(os.path.join(settings.BASE_DIR, 'media') + f'/{message.chat.id}/').mkdir(parents=True, exist_ok=True)
             if message.content_type == 'photo':
                 photo_id = message.photo[-1].file_id
@@ -89,7 +89,7 @@ class Command(BaseCommand):
                     new_file.write(downloaded_file)
                 NewMail['photo'] = f'{message.chat.id}/' + bot.get_file(
                     photo_id).file_path.replace('photos/', '')
-                print(NewMail['photo'])
+                # print(NewMail['photo'])
                 all_ok_markup = types.InlineKeyboardMarkup()
                 all_ok_markup.row(types.InlineKeyboardButton("Подтвердить", callback_data="yes_all_ok"))
                 bot.send_photo(message.chat.id, downloaded_file, caption=NewMail['text'], reply_markup=all_ok_markup)
@@ -98,10 +98,10 @@ class Command(BaseCommand):
         @log_errors
         @bot.message_handler(func=lambda message: get_state(message.chat.id) == 3)
         def enter_auditory(message):
-            print(message.text)
+            # print(message.text)
             NewMail['auditory'] = message.text
             mail_to_db = Mail.objects.create(text=NewMail['text'], photo=NewMail['photo'], auditory=NewMail['auditory'])
-            print(mail_to_db)
+            # print(mail_to_db)
             mail_to_db.save()
             set_state(message.chat.id, 0)
             bot.send_message(message.chat.id, "Отлично. Ваша заявка принята")
@@ -112,11 +112,11 @@ class Command(BaseCommand):
         @bot.callback_query_handler(func=lambda call: True)
         def callback_answer(call):
             if call.data == "yes_all_ok":
-                print(call.message.text)
+                # print(call.message.text)
                 set_state(call.message.chat.id, 3)
                 bot.send_message(call.message.chat.id, "Опишите целевую аудиторию для отправки email-рассылки")
             else:
-                print(call.data)
+                # print(call.data)
                 answer = Faq.objects.get(question=call.data)
                 bot.send_message(call.message.chat.id, answer.answer)
 
