@@ -48,30 +48,32 @@ class Command(BaseCommand):
         def main_bot(messages):
             for message in messages:
                 if message.text is not None:
-                    if message.text.split(' ')[0] == '/start':
-                        # print(message.chat.id)
-                        set_state(message.chat.id, 0)
-                        bot.send_message(message.chat.id, "Привет это чат поддержки", reply_markup=markup)
+                    if message.content_type == 'text':
+                        if message.text.split(' ')[0] == '/start':
+                            # print(message.chat.id)
+                            set_state(message.chat.id, 0)
+                            bot.send_message(message.chat.id, "Привет это чат поддержки", reply_markup=markup)
 
-                    if message.text == 'FAQ':
-                        faq_markup = types.InlineKeyboardMarkup()
-                        allfaq = Faq.objects.filter(is_active=True)
-                        for faqobj in allfaq:
-                            faqbtn = types.InlineKeyboardButton(text=faqobj.question, callback_data=faqobj.question)
-                            faq_markup.row(faqbtn)
-                        bot.send_message(message.chat.id, "Какой у вас вопрос?", reply_markup=faq_markup)
+                        if message.text == 'FAQ':
+                            faq_markup = types.InlineKeyboardMarkup()
+                            allfaq = Faq.objects.filter(is_active=True)
+                            for faqobj in allfaq:
+                                faqbtn = types.InlineKeyboardButton(text=faqobj.question, callback_data=faqobj.question)
+                                faq_markup.row(faqbtn)
+                            bot.send_message(message.chat.id, "Какой у вас вопрос?", reply_markup=faq_markup)
 
-                    if message.text == 'Рассылки':
-                        set_state(message.chat.id, 1)
-                        bot.send_message(message.chat.id, "Введите текст рассылки")
+                        if message.text == 'Рассылки':
+                            set_state(message.chat.id, 1)
+                            bot.send_message(message.chat.id, "Введите текст рассылки")
 
         @log_errors
         @bot.message_handler(func=lambda message: get_state(message.chat.id) == 1)
         def enter_text_to_send(message):
-            # print(message.text)
-            NewMail['text'] = message.text
-            set_state(message.chat.id, 2)
-            bot.send_message(message.chat.id, "Прикрепите изображение")
+            if message.content_type == 'text':
+                # print(message.text)
+                NewMail['text'] = message.text
+                set_state(message.chat.id, 2)
+                bot.send_message(message.chat.id, "Прикрепите изображение")
 
         @log_errors
         @bot.message_handler(content_types=["photo"], func=lambda message: get_state(message.chat.id) == 2)
@@ -98,13 +100,14 @@ class Command(BaseCommand):
         @log_errors
         @bot.message_handler(func=lambda message: get_state(message.chat.id) == 3)
         def enter_auditory(message):
-            # print(message.text)
-            NewMail['auditory'] = message.text
-            mail_to_db = Mail.objects.create(text=NewMail['text'], photo=NewMail['photo'], auditory=NewMail['auditory'])
-            # print(mail_to_db)
-            mail_to_db.save()
-            set_state(message.chat.id, 0)
-            bot.send_message(message.chat.id, "Отлично. Ваша заявка принята")
+            if message.content_type == 'text':
+                # print(message.text)
+                NewMail['auditory'] = message.text
+                mail_to_db = Mail.objects.create(text=NewMail['text'], photo=NewMail['photo'], auditory=NewMail['auditory'])
+                # print(mail_to_db)
+                mail_to_db.save()
+                set_state(message.chat.id, 0)
+                bot.send_message(message.chat.id, "Отлично. Ваша заявка принята")
 
         bot.set_update_listener(main_bot)
 
