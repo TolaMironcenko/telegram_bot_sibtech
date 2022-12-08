@@ -42,42 +42,54 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         bot = telebot.TeleBot(settings.BOT_TOKEN)
+
         # print(bot.get_me())
 
         @log_errors
         def main_bot(messages):
             for message in messages:
+                if message.content_type != 'text' and get_state(message.chat.id) == 1:
+                    bot.send_message(message.chat.id, "Введите текст рассылки")
+                elif message.content_type != 'photo' and get_state(message.chat.id) == 2:
+                    bot.send_message(message.chat.id, "Прикрепите изображение")
+                elif message.content_type != 'text' and get_state(message.chat.id) == 3:
+                    bot.send_message(message.chat.id, "Опишите текстом целевую аудиторию для отправки email-рассылки")
                 if message.text is not None:
-                    if message.content_type == 'text':
-                        if message.text.split(' ')[0] == '/start':
-                            # print(message.chat.id)
-                            set_state(message.chat.id, 0)
-                            bot.send_message(message.chat.id, "Привет это чат поддержки", reply_markup=markup)
+                    if message.text.split(' ')[0] == '/start':
+                        # print(message.chat.id)
+                        set_state(message.chat.id, 0)
+                        bot.send_message(message.chat.id, "Привет это чат поддержки", reply_markup=markup)
 
-                        if message.text == 'FAQ':
-                            faq_markup = types.InlineKeyboardMarkup()
-                            allfaq = Faq.objects.filter(is_active=True)
-                            for faqobj in allfaq:
-                                faqbtn = types.InlineKeyboardButton(text=faqobj.question, callback_data=faqobj.question)
-                                faq_markup.row(faqbtn)
-                            bot.send_message(message.chat.id, "Какой у вас вопрос?", reply_markup=faq_markup)
+                    if message.text == 'FAQ':
+                        faq_markup = types.InlineKeyboardMarkup()
+                        allfaq = Faq.objects.filter(is_active=True)
+                        for faqobj in allfaq:
+                            faqbtn = types.InlineKeyboardButton(text=faqobj.question, callback_data=faqobj.question)
+                            faq_markup.row(faqbtn)
+                        bot.send_message(message.chat.id, "Какой у вас вопрос?", reply_markup=faq_markup)
 
-                        if message.text == 'Рассылки':
-                            set_state(message.chat.id, 1)
-                            bot.send_message(message.chat.id, "Введите текст рассылки")
+                    if message.text == 'Рассылки':
+                        set_state(message.chat.id, 1)
+                        bot.send_message(message.chat.id, "Введите текст рассылки")
 
         @log_errors
-        @bot.message_handler(func=lambda message: get_state(message.chat.id) == 1)
+        @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 1)
         def enter_text_to_send(message):
+            # print(message.content_type)
+            # print(message.content_type)
+            print(message.content_type == 'text')
             if message.content_type == 'text':
                 # print(message.text)
                 NewMail['text'] = message.text
                 set_state(message.chat.id, 2)
                 bot.send_message(message.chat.id, "Прикрепите изображение")
+            else:
+                bot.send_message(message.chat.id, "Введите текст рассылки")
 
         @log_errors
-        @bot.message_handler(content_types=["photo"], func=lambda message: get_state(message.chat.id) == 2)
+        @bot.message_handler(content_types=['photo'], func=lambda message: get_state(message.chat.id) == 2)
         def enter_photo(message):
+            print(message.content_type == 'text')
             # print(message.text)
             Path(os.path.join(settings.BASE_DIR, 'media') + f'/{message.chat.id}/').mkdir(parents=True, exist_ok=True)
             if message.content_type == 'photo':
@@ -95,19 +107,24 @@ class Command(BaseCommand):
                 all_ok_markup = types.InlineKeyboardMarkup()
                 all_ok_markup.row(types.InlineKeyboardButton("Подтвердить", callback_data="yes_all_ok"))
                 bot.send_photo(message.chat.id, downloaded_file, caption=NewMail['text'], reply_markup=all_ok_markup)
-                # bot.send_message(message.chat.id, "Ваша заявка:\n", reply_markup=all_ok_markup)
+            else:
+                bot.send_message(message.chat.id, "Прикрепите изображение")
 
         @log_errors
-        @bot.message_handler(func=lambda message: get_state(message.chat.id) == 3)
+        @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 3)
         def enter_auditory(message):
+            print(message.content_type == 'text')
             if message.content_type == 'text':
                 # print(message.text)
                 NewMail['auditory'] = message.text
-                mail_to_db = Mail.objects.create(text=NewMail['text'], photo=NewMail['photo'], auditory=NewMail['auditory'])
+                mail_to_db = Mail.objects.create(text=NewMail['text'], photo=NewMail['photo'],
+                                                 auditory=NewMail['auditory'])
                 # print(mail_to_db)
                 mail_to_db.save()
                 set_state(message.chat.id, 0)
                 bot.send_message(message.chat.id, "Отлично. Ваша заявка принята")
+            else:
+                bot.send_message(message.chat.id, "Опишите целевую аудиторию для отправки email-рассылки")
 
         bot.set_update_listener(main_bot)
 
