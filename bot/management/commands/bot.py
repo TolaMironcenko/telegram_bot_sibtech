@@ -3,7 +3,7 @@ from django.conf import settings
 import telebot
 from telebot import types
 import time
-from bot.models import Faq, ChatState, Mail
+from bot.models import Faq, ChatState, Mail, Message, Chat
 from pathlib import Path
 import os
 
@@ -13,8 +13,12 @@ def set_state(user_id, status):
 
 
 def get_state(user_id):
-    state = ChatState.objects.get(chat_id=user_id)
-    return state.state
+    try:
+        state = ChatState.objects.get(chat_id=user_id)
+        return state.state
+    except Exception as e:
+        print(str(e))
+        return 0
 
 
 def log_errors(f):
@@ -32,28 +36,32 @@ def log_errors(f):
 markup = types.ReplyKeyboardMarkup(row_width=2)
 FAQbtn = types.KeyboardButton('FAQ')
 mailing = types.KeyboardButton('Рассылки')
+appeal = types.KeyboardButton('Создать обращение')
 markup.row(FAQbtn, mailing)
+markup.row(appeal)
 
 NewMail = {"text": '', 'photo': '', 'auditory': ''}
+bot = telebot.TeleBot(settings.BOT_TOKEN)
 
 
 class Command(BaseCommand):
     help = 'task1 bot'
 
     def handle(self, *args, **options):
-        bot = telebot.TeleBot(settings.BOT_TOKEN)
-
-        # print(bot.get_me())
 
         @log_errors
         def main_bot(messages):
             for message in messages:
+                # print(message)
                 if message.content_type != 'text' and get_state(message.chat.id) == 1:
-                    bot.send_message(message.chat.id, "Введите текст рассылки")
+                    bot.send_message(message.chat.id, "Необходимо ввести текст рассылки")
                 elif message.content_type != 'photo' and get_state(message.chat.id) == 2:
-                    bot.send_message(message.chat.id, "Прикрепите изображение")
+                    bot.send_message(message.chat.id, "Необходимо прикрепить изображение")
                 elif message.content_type != 'text' and get_state(message.chat.id) == 3:
-                    bot.send_message(message.chat.id, "Опишите текстом целевую аудиторию для отправки email-рассылки")
+                    bot.send_message(message.chat.id,
+                                     "Необходимо описать текстом целевую аудиторию для отправки email-рассылки")
+                elif message.content_type != 'text' and get_state(message.chat.id) == 4:
+                    bot.send_message(message.chat.id, "Необходимо ввести текст обращения")
                 if message.text is not None:
                     if message.text.split(' ')[0] == '/start':
                         # print(message.chat.id)
@@ -72,12 +80,32 @@ class Command(BaseCommand):
                         set_state(message.chat.id, 1)
                         bot.send_message(message.chat.id, "Введите текст рассылки")
 
+                    if message.text == 'Создать обращение':
+                        set_state(message.chat.id, 4)
+                        bot.send_message(message.chat.id, 'Введите текст обращения')
+
+        @log_errors
+        @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 4)
+        def enter_text_to_appeal(message):
+            if message.content_type == 'text':
+                set_state(message.chat.id, 0)
+                newMessage = Message.objects.create(id=message.message_id, text=message.text)
+                newMessage.save()
+                print(newMessage)
+                newChat, _ = Chat.objects.get_or_create(telegram_chat_id=message.chat.id,
+                                                     username=message.from_user.username if message.from_user.username else 'Скрыт',
+                                                     name=message.from_user.first_name)
+                newChat.messages.add(newMessage)
+
+                newChat.save()
+                print(newChat)
+
         @log_errors
         @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 1)
         def enter_text_to_send(message):
             # print(message.content_type)
             # print(message.content_type)
-            print(message.content_type == 'text')
+            # print(message.content_type == 'text')
             if message.content_type == 'text':
                 # print(message.text)
                 NewMail['text'] = message.text
@@ -89,7 +117,7 @@ class Command(BaseCommand):
         @log_errors
         @bot.message_handler(content_types=['photo'], func=lambda message: get_state(message.chat.id) == 2)
         def enter_photo(message):
-            print(message.content_type == 'text')
+            # print(message.content_type == 'text')
             # print(message.text)
             Path(os.path.join(settings.BASE_DIR, 'media') + f'/{message.chat.id}/').mkdir(parents=True, exist_ok=True)
             if message.content_type == 'photo':
@@ -113,7 +141,7 @@ class Command(BaseCommand):
         @log_errors
         @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 3)
         def enter_auditory(message):
-            print(message.content_type == 'text')
+            # print(message.content_type == 'text')
             if message.content_type == 'text':
                 # print(message.text)
                 NewMail['auditory'] = message.text

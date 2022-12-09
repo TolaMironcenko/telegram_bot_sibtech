@@ -64,3 +64,44 @@ class Mail(models.Model):
 
     def __str__(self):
         return f'{self.text}'
+
+
+class Message(models.Model):
+    text = models.TextField(
+        verbose_name='Текст сообщения',
+        null=False
+    )
+
+    class Meta:
+        verbose_name = 'Сообщение'
+        verbose_name_plural = 'Сообщения'
+
+    def __str__(self):
+        return f'{self.text}'
+
+
+class Chat(models.Model):
+    telegram_chat_id = models.TextField(
+        verbose_name='Чат id пользователя',
+        unique=True
+    )
+    username = models.TextField(
+        verbose_name='Username telegram',
+        unique=True
+    )
+    name = models.TextField(
+        verbose_name='Имя пользователя telegram'
+    )
+    messages = models.ManyToManyField(
+        Message,
+        verbose_name='Сообщения',
+        blank=True
+    )
+
+    class Meta:
+        verbose_name = 'Чат'
+        verbose_name_plural = 'Чаты'
+
+    def __str__(self):
+        return f'{self.telegram_chat_id} {self.username} {self.name}'
+
