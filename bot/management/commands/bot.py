@@ -89,16 +89,35 @@ class Command(BaseCommand):
         def enter_text_to_appeal(message):
             if message.content_type == 'text':
                 set_state(message.chat.id, 0)
-                newMessage = Message.objects.create(id=message.message_id, text=message.text)
-                newMessage.save()
-                print(newMessage)
-                newChat, _ = Chat.objects.get_or_create(telegram_chat_id=message.chat.id,
-                                                     username=message.from_user.username if message.from_user.username else 'Скрыт',
-                                                     name=message.from_user.first_name)
-                newChat.messages.add(newMessage)
+                result = bot.get_user_profile_photos(message.chat.id, offset=1, limit=1)
+                print(result)
+                photos = result.photos
+                print(photos)
+                Path(os.path.join(settings.BASE_DIR, 'media') + f'/{message.chat.id}/avatar/').mkdir(parents=True,
+                                                                                              exist_ok=True)
+                if photos:
+                    avatar = max(photos[0], key=lambda x: x.width)
+                    file_id = avatar.file_id
+                    downloaded_file = bot.download_file(bot.get_file(avatar.file_id).file_path)
+                    src = f'media/{message.chat.id}/avatar/' + bot.get_file(
+                        avatar.file_id).file_path.replace('photos/', '')
+                    print(src)
+                    with open(src, 'wb') as new_file:
+                        new_file.write(downloaded_file)
+                    bot.send_photo(message.chat.id, file_id, caption=file_id)
+                    # bot.send_photo(message.chat.id, avatar)
+                    newMessage = Message.objects.create(id=message.message_id, text=message.text)
+                    newMessage.save()
+                    print(newMessage)
+                    newChat, _ = Chat.objects.get_or_create(telegram_chat_id=message.chat.id,
+                                                            username=message.from_user.username if message.from_user.username else 'Скрыт',
+                                                            name=message.from_user.first_name,
+                                                            avatar=f'{message.chat.id}/avatar/' + bot.get_file(
+                                                                avatar.file_id).file_path.replace('photos/', ''))
+                    newChat.messages.add(newMessage)
 
-                newChat.save()
-                print(newChat)
+                    newChat.save()
+                    print(newChat)
 
         @log_errors
         @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 1)

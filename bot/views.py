@@ -26,6 +26,9 @@ def get_chats():
         print(str(e))
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    serializer = ChatSerializer(allchats)
+    return Response(serializer.data)
+
     print(allchats)
 
 

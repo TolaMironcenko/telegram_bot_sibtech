@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Faq, Mail
+from .models import Faq, Mail, Chat, Message
 
 
 @admin.register(Faq)
@@ -10,3 +10,8 @@ class FaqAdmin(admin.ModelAdmin):
 @admin.register(Mail)
 class MailAdmin(admin.ModelAdmin):
     list_display = ('text', 'photo', 'auditory')
+
+
+@admin.register(Chat)
+class ChatAdmin(admin.ModelAdmin):
+    list_display = ('telegram_chat_id', 'username', 'name', 'avatar')

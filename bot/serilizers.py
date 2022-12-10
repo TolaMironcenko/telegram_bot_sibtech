@@ -6,7 +6,7 @@ class ChatSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Chat
-        fields = ('id', 'telegram_chat_id', 'username', 'name', 'messages')
+        fields = ('id', 'telegram_chat_id', 'username', 'name', 'avatar', 'messages')
 
 
 class MessageSerializer(serializers.HyperlinkedModelSerializer):

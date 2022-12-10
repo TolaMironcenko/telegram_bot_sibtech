@@ -92,6 +92,11 @@ class Chat(models.Model):
     name = models.TextField(
         verbose_name='Имя пользователя telegram'
     )
+    avatar = models.FileField(
+        verbose_name='Аватар пользователя в телеграм',
+        upload_to='media/',
+        default='usericon.png'
+    )
     messages = models.ManyToManyField(
         Message,
         verbose_name='Сообщения',
