@@ -18,17 +18,17 @@ class ChatViewet(viewsets.ModelViewSet):
     serializer_class = ChatSerializer
 
 
-@api_view(['GET'])
-def get_chats():
-    try:
-        allchats = Chat.objects.all()
-    except Exception as e:
-        print(str(e))
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# @api_view(['GET'])
+# def get_messages(chat_id):
+#     try:
+#         Messages = Chat.objects.all()
+#     except Exception as e:
+#         print(str(e))
+#         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    serializer = ChatSerializer(allchats)
-    return Response(serializer.data)
+#     serializer = ChatSerializer(allchats)
+#     return Response(serializer.data)
 
-    print(allchats)
+#     print(allchats)
 
 
