@@ -6,6 +6,7 @@ import time
 from bot.models import Faq, ChatState, Mail, Message, Chat
 from pathlib import Path
 import os
+import datetime
 
 
 def set_state(user_id, status):
@@ -90,9 +91,9 @@ class Command(BaseCommand):
             if message.content_type == 'text':
                 set_state(message.chat.id, 0)
                 result = bot.get_user_profile_photos(message.chat.id, offset=1, limit=1)
-                print(result)
+                # print(result)
                 photos = result.photos
-                print(photos)
+                # print(photos)
                 Path(os.path.join(settings.BASE_DIR, 'media') + f'/{message.chat.id}/avatar/').mkdir(parents=True,
                                                                                               exist_ok=True)
                 if photos:
@@ -101,23 +102,48 @@ class Command(BaseCommand):
                     downloaded_file = bot.download_file(bot.get_file(avatar.file_id).file_path)
                     src = f'media/{message.chat.id}/avatar/' + bot.get_file(
                         avatar.file_id).file_path.replace('photos/', '')
-                    print(src)
+                    # print(src)
                     with open(src, 'wb') as new_file:
                         new_file.write(downloaded_file)
-                    bot.send_photo(message.chat.id, file_id, caption=file_id)
+                    # bot.send_photo(message.chat.id, file_id, caption=file_id)
                     # bot.send_photo(message.chat.id, avatar)
-                    newMessage = Message.objects.create(id=message.message_id, text=message.text)
+                    newMessage = Message.objects.create(text=message.text)
                     newMessage.save()
-                    print(newMessage)
+                    # print(newMessage)
                     newChat, _ = Chat.objects.get_or_create(telegram_chat_id=message.chat.id,
                                                             username=message.from_user.username if message.from_user.username else 'Скрыт',
                                                             name=message.from_user.first_name,
                                                             avatar=f'{message.chat.id}/avatar/' + bot.get_file(
                                                                 avatar.file_id).file_path.replace('photos/', ''))
-                    newChat.messages.add(newMessage)
+                    # print(_)
+                    if not _:
+                        newChat = Chat.objects.filter(telegram_chat_id=message.chat.id)
+                        newChat[0].messages.add(newMessage)
 
-                    newChat.save()
+                        newChat[0].save()
+                    else:
+                        newChat.messages.add(newMessage)
+
+                        newChat.save()
                     print(newChat)
+                else:
+                    newMessage = Message.objects.create(id=message.message_id, text=message.text, time=datetime.datetime.now())
+                    newMessage.save()
+                    # print(newMessage)
+                    newChat, _ = Chat.objects.get_or_create(telegram_chat_id=message.chat.id,
+                                                            username=message.from_user.username if message.from_user.username else 'Скрыт',
+                                                            name=message.from_user.first_name)
+                    # print(_)
+                    if not _:
+                        newChat = Chat.objects.filter(telegram_chat_id=message.chat.id)
+                        newChat[0].messages.add(newMessage)
+
+                        newChat[0].save()
+                    else:
+                        newChat.messages.add(newMessage)
+
+                        newChat.save()
+                    # print(newChat)
 
         @log_errors
         @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 1)
