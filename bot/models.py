@@ -1,4 +1,5 @@
 from django.db import models
+import datetime
 
 
 class Faq(models.Model):
@@ -70,6 +71,14 @@ class Message(models.Model):
     text = models.TextField(
         verbose_name='Текст сообщения',
         null=False
+    )
+    time = models.TimeField(
+        verbose_name='Время отправки',
+        default=datetime.datetime.now()
+    )
+    from_user = models.TextField(
+        verbose_name='От кого',
+        default='telegram'
     )
 
     class Meta:
