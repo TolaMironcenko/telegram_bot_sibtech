@@ -117,15 +117,15 @@ class Command(BaseCommand):
                                                                 avatar.file_id).file_path.replace('photos/', ''))
                     # print(_)
                     if not _:
-                        newChat = Chat.objects.filter(telegram_chat_id=message.chat.id)
-                        newChat[0].messages.add(newMessage)
+                        newChat = Chat.objects.get(telegram_chat_id=message.chat.id)
+                        newChat.messages.add(newMessage)
 
-                        newChat[0].save()
+                        newChat.save()
                     else:
                         newChat.messages.add(newMessage)
 
                         newChat.save()
-                    print(newChat)
+                    # print(newChat)
                 else:
                     newMessage = Message.objects.create(id=message.message_id, text=message.text, time=datetime.datetime.now())
                     newMessage.save()
@@ -135,10 +135,10 @@ class Command(BaseCommand):
                                                             name=message.from_user.first_name)
                     # print(_)
                     if not _:
-                        newChat = Chat.objects.filter(telegram_chat_id=message.chat.id)
-                        newChat[0].messages.add(newMessage)
+                        newChat = Chat.objects.get(telegram_chat_id=message.chat.id)
+                        newChat.messages.add(newMessage)
 
-                        newChat[0].save()
+                        newChat.save()
                     else:
                         newChat.messages.add(newMessage)
 
