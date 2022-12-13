@@ -95,10 +95,10 @@ class Command(BaseCommand):
                 photos = result.photos
                 # print(photos)
                 Path(os.path.join(settings.BASE_DIR, 'media') + f'/{message.chat.id}/avatar/').mkdir(parents=True,
-                                                                                              exist_ok=True)
+                                                                                                     exist_ok=True)
                 if photos:
                     avatar = max(photos[0], key=lambda x: x.width)
-                    file_id = avatar.file_id
+                    # file_id = avatar.file_id
                     downloaded_file = bot.download_file(bot.get_file(avatar.file_id).file_path)
                     src = f'media/{message.chat.id}/avatar/' + bot.get_file(
                         avatar.file_id).file_path.replace('photos/', '')
@@ -127,7 +127,8 @@ class Command(BaseCommand):
                         newChat.save()
                     # print(newChat)
                 else:
-                    newMessage = Message.objects.create(id=message.message_id, text=message.text, time=datetime.datetime.now())
+                    newMessage = Message.objects.create(id=message.message_id, text=message.text,
+                                                        time=datetime.datetime.now())
                     newMessage.save()
                     # print(newMessage)
                     newChat, _ = Chat.objects.get_or_create(telegram_chat_id=message.chat.id,

@@ -116,4 +116,3 @@ class Chat(models.Model):
 
     def __str__(self):
         return f'{self.telegram_chat_id} {self.username} {self.name}'
-

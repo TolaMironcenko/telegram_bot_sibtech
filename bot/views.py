@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from .management.commands.bot import bot
 from .models import Message, Chat
 from .serilizers import MessageSerializer, ChatSerializer
@@ -37,18 +36,3 @@ def send_to_telegram(request):
     bot.send_message(request_body['chat_id'], request_body['message'])
 
     return Response("{\"OK\":\"true\"}")
-
-# @api_view(['GET'])
-# def get_messages(chat_id):
-#     try:
-#         Messages = Chat.objects.all()
-#     except Exception as e:
-#         print(str(e))
-#         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#     serializer = ChatSerializer(allchats)
-#     return Response(serializer.data)
-
-#     print(allchats)
-
-

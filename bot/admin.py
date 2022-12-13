@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Faq, Mail, Chat, Message
+from .models import Faq, Mail, Chat
 
 
 @admin.register(Faq)

@@ -1,5 +1,5 @@
 from rest_framework import routers
-from django.urls import path, include
+from django.urls import path
 from .views import MessageViewset, ChatViewet, send_to_telegram
 
 router = routers.DefaultRouter()
