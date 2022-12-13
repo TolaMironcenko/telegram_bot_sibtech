@@ -38,8 +38,9 @@ markup = types.ReplyKeyboardMarkup(row_width=2)
 FAQbtn = types.KeyboardButton('FAQ')
 mailing = types.KeyboardButton('Рассылки')
 appeal = types.KeyboardButton('Создать обращение')
+openline = types.KeyboardButton('Открытая линия')
 markup.row(FAQbtn, mailing)
-markup.row(appeal)
+markup.row(appeal, openline)
 
 NewMail = {"text": '', 'photo': '', 'auditory': ''}
 bot = telebot.TeleBot(settings.BOT_TOKEN)
@@ -63,6 +64,8 @@ class Command(BaseCommand):
                                      "Необходимо описать текстом целевую аудиторию для отправки email-рассылки")
                 elif message.content_type != 'text' and get_state(message.chat.id) == 4:
                     bot.send_message(message.chat.id, "Необходимо ввести текст обращения")
+                elif message.content_type != 'text' and get_state(message.chat.id) == 5:
+                    bot.send_message(message.chat.id, 'Необходимо ввести именно текст сообщения для оператора поддержки')
                 if message.text is not None:
                     if message.text.split(' ')[0] == '/start':
                         # print(message.chat.id)
@@ -84,6 +87,16 @@ class Command(BaseCommand):
                     if message.text == 'Создать обращение':
                         set_state(message.chat.id, 4)
                         bot.send_message(message.chat.id, 'Введите текст обращения')
+
+                    if message.text == 'Открытая линия':
+                        set_state(message.chat.id, 5)
+                        bot.send_message(message.chat.id, 'Введите текст сообщения для оператора поддержки',
+                                         reply_markup=types.ReplyKeyboardRemove())
+
+        @log_errors
+        @bot.message_handler(connent_types=['text'], func=lambda message: get_state(message.chat.id) == 5)
+        def enter_to_bitrix_chat(message):
+            bot.send_message(message.chat.id, 'ok')
 
         @log_errors
         @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 4)
