@@ -92,7 +92,6 @@ class Message(models.Model):
 class Chat(models.Model):
     telegram_chat_id = models.TextField(
         verbose_name='Чат id пользователя',
-        unique=True
     )
     username = models.TextField(
         verbose_name='Username telegram',
