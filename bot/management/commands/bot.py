@@ -94,9 +94,11 @@ class Command(BaseCommand):
                                          reply_markup=types.ReplyKeyboardRemove())
 
         @log_errors
-        @bot.message_handler(connent_types=['text'], func=lambda message: get_state(message.chat.id) == 5)
+        @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 5)
         def enter_to_bitrix_chat(message):
+            print(message.text)
             bot.send_message(message.chat.id, 'ok')
+            set_state(message.chat.id, 0)
 
         @log_errors
         @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 4)
