@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-q7kr0+ne!eu$rkixyk=g+w1tq7o0sg3o)o9u4o7vg2r@(+zu+z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://tolamironcenko-ubiquitous-succotash-jg9j9pxvppqfv9w-8000.preview.app.github.dev/', 'localhost']
 
 # Application definition
 
@@ -65,6 +65,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000'
 ]
+
+CSRF_TRUSTED_ORIGINS = ['https://tolamironcenko-ubiquitous-succotash-jg9j9pxvppqfv9w-8000.preview.app.github.dev','https://*.127.0.0.1']
 
 ROOT_URLCONF = 'task1_bot.urls'
 
