@@ -39,7 +39,7 @@ markup = types.ReplyKeyboardMarkup(row_width=2)
 FAQbtn = types.KeyboardButton('FAQ')
 mailing = types.KeyboardButton('Рассылки')
 appeal = types.KeyboardButton('Создать обращение')
-openline = types.KeyboardButton('Открытая линия')
+openline = types.InlineKeyboardButton(text='Открытая линия', url='https://t.me/bitrix24_test_tolamiron_bot')
 markup.row(FAQbtn, mailing)
 markup.row(appeal, openline)
 
@@ -92,17 +92,18 @@ class Command(BaseCommand):
 
                     if message.text == 'Открытая линия':
                         set_state(message.chat.id, 5)
-                        bot.send_message(message.chat.id, 'Введите текст сообщения для оператора поддержки',
-                                         reply_markup=types.ReplyKeyboardRemove())
+                        bot.send_message(message.chat.id, 'Переходите в чат открытой линии', reply_markup=types.InlineKeyboardMarkup().row(types.InlineKeyboardButton(text='Открытая линия', url='https://t.me/bitrix24_test_tolamiron_bot')))
+                        # bot.send_message(message.chat.id, 'Введите текст сообщения для оператора поддержки',
+                        #                  reply_markup=types.ReplyKeyboardRemove())
 
-        @log_errors
-        @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 5)
-        def enter_to_bitrix_chat(message):
-            bx24 = Bitrix24('https://b24-iqrh1t.bitrix24.ru/rest/1/dmmf56d1jmeh5wqe/')
-            print('bx24 = ', bx24.callMethod('crm.product.list'))
-            print(message.text)
-            bot.send_message(message.chat.id, 'ok')
-            set_state(message.chat.id, 0)
+        # @log_errors
+        # @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 5)
+        # def enter_to_bitrix_chat(message):
+        #     bx24 = Bitrix24('https://b24-iqrh1t.bitrix24.ru/rest/1/dmmf56d1jmeh5wqe/')
+        #     print('bx24 = ', bx24.callMethod('crm.product.list'))
+        #     # print(message.text)
+        #     set_state(message.chat.id, 0)
+        #     bot.send_message(message.chat.id, 'ok')
 
         @log_errors
         @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 4)
