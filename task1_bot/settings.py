@@ -60,7 +60,7 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = (
     'accept',
@@ -75,7 +75,7 @@ CORS_ALLOW_HEADERS = (
     'access-control-allow-origin'
 )
 
-CSRF_TRUSTED_ORIGINS = ['https://tolamironcenko-ubiquitous-succotash-jg9j9pxvppqfv9w-8000.preview.app.github.dev','https://*.127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://*.tolamironcenko-ubiquitous-succotash-jg9j9pxvppqfv9w-8000.preview.app.github.dev','https://*.127.0.0.1']
 
 ROOT_URLCONF = 'task1_bot.urls'
 

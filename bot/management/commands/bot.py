@@ -73,6 +73,7 @@ class Command(BaseCommand):
                         bot.send_message(message.chat.id, "Привет это чат поддержки", reply_markup=markup)
 
                     if message.text == 'FAQ':
+                        set_state(message.chat.id, 0)
                         faq_markup = types.InlineKeyboardMarkup()
                         allfaq = Faq.objects.filter(is_active=True)
                         for faqobj in allfaq:
