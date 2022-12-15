@@ -7,6 +7,7 @@ from bot.models import Faq, ChatState, Mail, Message, Chat
 from pathlib import Path
 import os
 import datetime
+from bitrix24 import *
 
 
 def set_state(user_id, status):
@@ -97,6 +98,8 @@ class Command(BaseCommand):
         @log_errors
         @bot.message_handler(content_types=['text'], func=lambda message: get_state(message.chat.id) == 5)
         def enter_to_bitrix_chat(message):
+            bx24 = Bitrix24('https://b24-iqrh1t.bitrix24.ru/rest/1/dmmf56d1jmeh5wqe/')
+            print('bx24 = ', bx24.callMethod('crm.product.list'))
             print(message.text)
             bot.send_message(message.chat.id, 'ok')
             set_state(message.chat.id, 0)
